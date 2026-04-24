@@ -14,13 +14,18 @@
 
     .layout {
       display: grid;
-      grid-template-columns: 320px 1fr;
+      grid-template-columns: 1fr 320px;
       height: 100vh;
+    }
+
+    .preview {
+      position: relative;
+      background: #000;
     }
 
     .panel {
       background: #111;
-      border-right: 1px solid #333;
+      border-left: 1px solid #333;
       padding: 18px;
       box-sizing: border-box;
       overflow-y: auto;
@@ -73,11 +78,6 @@
       width: 100%;
     }
 
-    .preview {
-      position: relative;
-      background: #000;
-    }
-
     canvas {
       display: block;
     }
@@ -87,6 +87,8 @@
 <body>
 
 <div class="layout">
+  <div class="preview" id="preview"></div>
+
   <div class="panel">
     <h2>Bitmap Font Tester</h2>
 
@@ -122,8 +124,6 @@ Here</textarea>
       <input id="lineSlider" type="range" min="-50" max="150" value="0">
     </div>
   </div>
-
-  <div class="preview" id="preview"></div>
 </div>
 
 <script src="https://pixijs.download/v7.4.3/pixi.min.js"></script>
