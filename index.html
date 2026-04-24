@@ -2,29 +2,123 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Bitmap Font Tester</title>
+  <title>Bitmap Font Previewer</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #2d4557;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      height: 64px;
+      background: white;
+      color: black;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .main {
+      text-align: center;
+      padding-top: 70px;
+    }
+
+    h2 {
+      margin-bottom: 6px;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .info {
+      display: inline-block;
+      background: #e5f6ff;
+      color: #06415f;
+      padding: 16px 28px;
+      border-radius: 4px;
+      margin-bottom: 36px;
+      font-size: 16px;
+    }
+
+    #dropZone {
+      width: 520px;
+      height: 250px;
+      margin: 0 auto 28px auto;
+      border: 2px dashed white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    textarea {
+      width: 700px;
+      height: 120px;
+      font-size: 18px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 14px;
+    }
+
+    .controls {
+      margin-bottom: 18px;
+      font-size: 15px;
+    }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 
-<body style="margin:0; background:#1f1f1f; color:white; font-family:Arial;">
+<body>
 
-<div style="padding:16px;">
-  <h2>Bitmap Font Tester</h2>
+<header>
+  <img class="logo" src="logo.png" />
+  <div class="title">Font Previewer</div>
+</header>
 
-  <div id="dropZone" style="
-    border:2px dashed #777;
-    padding:30px;
-    text-align:center;
-    margin-bottom:12px;
-    background:#2b2b2b;
-  ">
-    Drag & drop .fnt and .png here
+<div class="main">
+  <h2>Import Bitmap Font files to preview</h2>
+  <div class="subtitle">(.fnt, .png)</div>
+
+  <div class="info">ⓘ Support bitmap font exported files</div>
+
+  <div id="dropZone">
+    Drag & drop files here or Click to select files
   </div>
 
-  <textarea id="textInput" rows="5" style="width:100%; font-size:18px;">Enter
-Text
-Here</textarea>
+  <textarea id="textInput">FREE SPINS
+BIG WIN
+1000</textarea>
 
-  <div style="margin-top:12px;">
+  <div class="controls">
     Size:
     <input id="scaleSlider" type="range" min="0.2" max="3" step="0.05" value="1">
     <span id="scaleValue">1</span>
@@ -41,219 +135,7 @@ Here</textarea>
 
 <script src="https://pixijs.download/v7.4.3/pixi.min.js"></script>
 
-<script>
-const app = new PIXI.Application({
-  width: window.innerWidth,
-  height: 520,
-  backgroundColor: 0x222222,
-  antialias: true
-});
-
-document.body.appendChild(app.view);
-
-const container = new PIXI.Container();
-app.stage.addChild(container);
-
-let fontData = null;
-let baseTexture = null;
-
-const dropZone = document.getElementById("dropZone");
-const input = document.getElementById("textInput");
-
-const scaleSlider = document.getElementById("scaleSlider");
-const spacingSlider = document.getElementById("spacingSlider");
-const lineSlider = document.getElementById("lineSlider");
-
-const scaleValue = document.getElementById("scaleValue");
-const spacingValue = document.getElementById("spacingValue");
-const lineValue = document.getElementById("lineValue");
-
-window.addEventListener("resize", () => {
-  app.renderer.resize(window.innerWidth, 520);
-  renderText();
-});
-
-dropZone.addEventListener("dragover", e => {
-  e.preventDefault();
-  dropZone.style.background = "#3a3a3a";
-});
-
-dropZone.addEventListener("dragleave", () => {
-  dropZone.style.background = "#2b2b2b";
-});
-
-dropZone.addEventListener("drop", async e => {
-  e.preventDefault();
-  dropZone.style.background = "#2b2b2b";
-
-  const files = [...e.dataTransfer.files];
-
-  const fntFile = files.find(f => f.name.toLowerCase().endsWith(".fnt"));
-  const imageFile = files.find(f =>
-    f.name.toLowerCase().endsWith(".png") ||
-    f.name.toLowerCase().endsWith(".jpg") ||
-    f.name.toLowerCase().endsWith(".webp")
-  );
-
-  if (!fntFile || !imageFile) {
-    alert("Drop both .fnt file and atlas image.");
-    return;
-  }
-
-  const fntText = await fntFile.text();
-  fontData = parseFnt(fntText);
-
-  const imageUrl = URL.createObjectURL(imageFile);
-  baseTexture = PIXI.BaseTexture.from(imageUrl);
-
-  baseTexture.once("loaded", renderText);
-
-  dropZone.innerHTML = `Loaded: ${fntFile.name} + ${imageFile.name}`;
-});
-
-input.addEventListener("input", renderText);
-
-scaleSlider.addEventListener("input", () => {
-  scaleValue.textContent = scaleSlider.value;
-  renderText();
-});
-
-spacingSlider.addEventListener("input", () => {
-  spacingValue.textContent = spacingSlider.value;
-  renderText();
-});
-
-lineSlider.addEventListener("input", () => {
-  lineValue.textContent = lineSlider.value;
-  renderText();
-});
-
-function parseFnt(text) {
-  const chars = {};
-  const kernings = {};
-  let lineHeight = 64;
-
-  const lines = text.split(/\r?\n/);
-
-  for (const line of lines) {
-    if (line.startsWith("common ")) {
-      const data = parseLine(line);
-      lineHeight = Number(data.lineHeight || lineHeight);
-    }
-
-    if (line.startsWith("char ")) {
-      const data = parseLine(line);
-      chars[data.id] = {
-        id: Number(data.id),
-        x: Number(data.x),
-        y: Number(data.y),
-        width: Number(data.width),
-        height: Number(data.height),
-        xoffset: Number(data.xoffset),
-        yoffset: Number(data.yoffset),
-        xadvance: Number(data.xadvance)
-      };
-    }
-
-    if (line.startsWith("kerning ")) {
-      const data = parseLine(line);
-      const key = `${data.first},${data.second}`;
-      kernings[key] = Number(data.amount);
-    }
-  }
-
-  return { chars, kernings, lineHeight };
-}
-
-function parseLine(line) {
-  const data = {};
-  const regex = /(\w+)=("[^"]*"|\S+)/g;
-  let match;
-
-  while ((match = regex.exec(line))) {
-    data[match[1]] = match[2].replace(/"/g, "");
-  }
-
-  return data;
-}
-
-function getKerning(prevId, currentId) {
-  if (!prevId) return 0;
-  return fontData.kernings[`${prevId},${currentId}`] || 0;
-}
-
-function renderText() {
-  container.removeChildren();
-
-  if (!fontData || !baseTexture) return;
-
-  const scale = Number(scaleSlider.value);
-  const extraSpacing = Number(spacingSlider.value);
-  const extraLineSpacing = Number(lineSlider.value);
-
-  const lines = input.value.split("\n");
-  const renderedLines = [];
-
-  let maxWidth = 0;
-
-  for (const line of lines) {
-    let x = 0;
-    let prevId = null;
-    const sprites = [];
-
-    for (const ch of line) {
-      const id = ch.charCodeAt(0);
-
-      if (ch === " ") {
-        x += (fontData.chars[32]?.xadvance || 30) + extraSpacing;
-        prevId = id;
-        continue;
-      }
-
-      const glyph = fontData.chars[id];
-      if (!glyph) continue;
-
-      x += getKerning(prevId, id);
-
-      const texture = new PIXI.Texture(
-        baseTexture,
-        new PIXI.Rectangle(glyph.x, glyph.y, glyph.width, glyph.height)
-      );
-
-      const sprite = new PIXI.Sprite(texture);
-      sprite.x = x + glyph.xoffset;
-      sprite.y = glyph.yoffset;
-
-      sprites.push(sprite);
-
-      x += glyph.xadvance + extraSpacing;
-      prevId = id;
-    }
-
-    renderedLines.push({ sprites, width: x });
-    maxWidth = Math.max(maxWidth, x);
-  }
-
-  const totalHeight =
-    lines.length * fontData.lineHeight +
-    (lines.length - 1) * extraLineSpacing;
-
-  const startX = app.renderer.width / 2 - (maxWidth * scale) / 2;
-  const startY = app.renderer.height / 2 - (totalHeight * scale) / 2;
-
-  renderedLines.forEach((line, lineIndex) => {
-    const lineContainer = new PIXI.Container();
-
-    line.sprites.forEach(sprite => lineContainer.addChild(sprite));
-
-    lineContainer.x = startX + ((maxWidth - line.width) * scale) / 2;
-    lineContainer.y = startY + lineIndex * (fontData.lineHeight + extraLineSpacing) * scale;
-    lineContainer.scale.set(scale);
-
-    container.addChild(lineContainer);
-  });
-}
-</script>
+<!-- keep your existing JavaScript here -->
 
 </body>
 </html>
