@@ -3,73 +3,142 @@
 <head>
   <meta charset="UTF-8" />
   <title>Bitmap Font Tester</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      height: 100vh;
+    }
+
+    .panel {
+      background: #111;
+      border-right: 1px solid #333;
+      padding: 18px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    h2 {
+      margin: 0 0 16px 0;
+      font-size: 20px;
+    }
+
+    #dropZone {
+      border: 1.5px dashed #666;
+      background: #181818;
+      border-radius: 12px;
+      padding: 22px 12px;
+      text-align: center;
+      font-size: 13px;
+      color: #ccc;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+
+    textarea {
+      width: 100%;
+      height: 110px;
+      box-sizing: border-box;
+      resize: vertical;
+      background: #050505;
+      color: white;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+
+    .control {
+      margin-bottom: 14px;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #ccc;
+      margin-bottom: 5px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .preview {
+      position: relative;
+      background: #000;
+    }
+
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
 
-<body style="margin:0; background:#000; color:white; font-family:Arial;">
+<body>
 
-<div style="padding:24px; max-width:900px; margin:0 auto;">
+<div class="layout">
+  <div class="panel">
+    <h2>Bitmap Font Tester</h2>
 
-  <h2 style="margin-bottom:20px;">Bitmap Font Tester</h2>
+    <div id="dropZone">
+      Drag & drop .fnt + atlas image
+    </div>
 
-  <div id="dropZone" style="
-    border:2px dashed #777;
-    padding:40px;
-    text-align:center;
-    margin-bottom:24px;
-    background:#1a1a1a;
-    font-size:18px;
-  ">
-    Drag & drop .fnt and .png here
-  </div>
-
-  <textarea id="textInput" rows="5" style="
-    width:100%;
-    font-size:18px;
-    padding:12px;
-    margin-bottom:24px;
-    background:#111;
-    color:white;
-    border:1px solid #444;
-    border-radius:6px;
-  ">Enter
+    <textarea id="textInput">Enter
 Text
 Here</textarea>
 
-  <div style="display:flex; flex-direction:column; gap:18px;">
-
-    <div>
-      <div style="margin-bottom:6px;">Size</div>
-      <input id="scaleSlider" type="range" min="0.2" max="3" step="0.05" value="1" style="width:100%;">
-      <div id="scaleValue">1</div>
+    <div class="control">
+      <div class="control-row">
+        <span>Size</span>
+        <span id="scaleValue">1</span>
+      </div>
+      <input id="scaleSlider" type="range" min="0.2" max="3" step="0.05" value="1">
     </div>
 
-    <div>
-      <div style="margin-bottom:6px;">Extra Spacing</div>
-      <input id="spacingSlider" type="range" min="-30" max="60" value="0" style="width:100%;">
-      <div id="spacingValue">0</div>
+    <div class="control">
+      <div class="control-row">
+        <span>Extra Spacing</span>
+        <span id="spacingValue">0</span>
+      </div>
+      <input id="spacingSlider" type="range" min="-30" max="60" value="0">
     </div>
 
-    <div>
-      <div style="margin-bottom:6px;">Line Spacing</div>
-      <input id="lineSlider" type="range" min="-50" max="150" value="0" style="width:100%;">
-      <div id="lineValue">0</div>
+    <div class="control">
+      <div class="control-row">
+        <span>Line Spacing</span>
+        <span id="lineValue">0</span>
+      </div>
+      <input id="lineSlider" type="range" min="-50" max="150" value="0">
     </div>
-
   </div>
 
+  <div class="preview" id="preview"></div>
 </div>
 
 <script src="https://pixijs.download/v7.4.3/pixi.min.js"></script>
 
 <script>
+const preview = document.getElementById("preview");
+
 const app = new PIXI.Application({
-  width: window.innerWidth,
-  height: 520,
-  backgroundColor: 0x111111,
+  width: preview.clientWidth,
+  height: window.innerHeight,
+  backgroundColor: 0x000000,
   antialias: true
 });
 
-document.body.appendChild(app.view);
+preview.appendChild(app.view);
 
 const container = new PIXI.Container();
 app.stage.addChild(container);
@@ -89,22 +158,22 @@ const spacingValue = document.getElementById("spacingValue");
 const lineValue = document.getElementById("lineValue");
 
 window.addEventListener("resize", () => {
-  app.renderer.resize(window.innerWidth, 520);
+  app.renderer.resize(preview.clientWidth, window.innerHeight);
   renderText();
 });
 
 dropZone.addEventListener("dragover", e => {
   e.preventDefault();
-  dropZone.style.background = "#333";
+  dropZone.style.background = "#242424";
 });
 
 dropZone.addEventListener("dragleave", () => {
-  dropZone.style.background = "#1a1a1a";
+  dropZone.style.background = "#181818";
 });
 
 dropZone.addEventListener("drop", async e => {
   e.preventDefault();
-  dropZone.style.background = "#1a1a1a";
+  dropZone.style.background = "#181818";
 
   const files = [...e.dataTransfer.files];
 
@@ -128,7 +197,7 @@ dropZone.addEventListener("drop", async e => {
 
   baseTexture.once("loaded", renderText);
 
-  dropZone.innerHTML = `Loaded: ${fntFile.name} + ${imageFile.name}`;
+  dropZone.innerHTML = `Loaded:<br>${fntFile.name}<br>${imageFile.name}`;
 });
 
 input.addEventListener("input", renderText);
@@ -263,7 +332,6 @@ function renderText() {
 
   renderedLines.forEach((line, lineIndex) => {
     const lineContainer = new PIXI.Container();
-
     line.sprites.forEach(sprite => lineContainer.addChild(sprite));
 
     lineContainer.x = startX + ((maxWidth - line.width) * scale) / 2;
