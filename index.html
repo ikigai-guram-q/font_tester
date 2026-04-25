@@ -31,9 +31,19 @@
       overflow-y: auto;
     }
 
-    h2 {
+    /* 🔹 UPDATED TITLE */
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       margin: 0 0 16px 0;
       font-size: 20px;
+    }
+
+    .title-icon {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
     }
 
     #dropZone {
@@ -90,7 +100,11 @@
   <div class="preview" id="preview"></div>
 
   <div class="panel">
-    <h2>Bitmap Font Tester</h2>
+    <!-- 🔹 UPDATED HEADER -->
+    <h2 class="title">
+      <img src="./ikg_icon.png" class="title-icon">
+      Bitmap Font Tester
+    </h2>
 
     <div id="dropZone">
       Drag & drop .fnt + atlas image
