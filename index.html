@@ -31,28 +31,12 @@
       overflow-y: auto;
     }
 
-    /* 🔥 TITLE FIXED */
-    .title {
-      display: flex;
-      align-items: flex-end; /* align to IKG baseline */
-      gap: 16px;
-      margin: 0 0 18px 0;
-      height: 110px; /* matches logo height */
-    }
-
-    .title-icon {
-      width: 110px;
-      height: 110px;
+    .title-logo {
+      width: 100%;
+      height: auto;
+      display: block;
       object-fit: contain;
-      flex-shrink: 0;
-    }
-
-    .title-text {
-      font-size: 52px;   /* visually matches IKG */
-      font-weight: 800;
-      line-height: 0.85; /* removes top/bottom spacing */
-      white-space: nowrap;
-      transform: translateY(-4px); /* fine-tune baseline */
+      margin: 0 0 22px 0;
     }
 
     #dropZone {
@@ -109,10 +93,7 @@
   <div class="preview" id="preview"></div>
 
   <div class="panel">
-    <h2 class="title">
-      <img src="./ikg_icon.png" class="title-icon">
-      <span class="title-text">Bitmap Font Tester</span>
-    </h2>
+    <img src="./icon_tester.png" class="title-logo">
 
     <div id="dropZone">
       Drag & drop .fnt + atlas image
@@ -242,7 +223,7 @@ function parseFnt(text) {
   const kernings = {};
   let lineHeight = 64;
 
-  const lines = text.split(/\\r?\\n/);
+  const lines = text.split(/\r?\n/);
 
   for (const line of lines) {
     if (line.startsWith("common ")) {
@@ -276,7 +257,7 @@ function parseFnt(text) {
 
 function parseLine(line) {
   const data = {};
-  const regex = /(\\w+)=("[^"]*"|\\S+)/g;
+  const regex = /(\w+)=("[^"]*"|\S+)/g;
   let match;
 
   while ((match = regex.exec(line))) {
@@ -300,7 +281,7 @@ function renderText() {
   const extraSpacing = Number(spacingSlider.value);
   const extraLineSpacing = Number(lineSlider.value);
 
-  const lines = input.value.split("\\n");
+  const lines = input.value.split("\n");
   const renderedLines = [];
 
   let maxWidth = 0;
