@@ -31,19 +31,27 @@
       overflow-y: auto;
     }
 
-    /* 🔹 UPDATED TITLE */
     .title {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      align-items: flex-start;
+      gap: 12px;
       margin: 0 0 16px 0;
-      font-size: 20px;
+      height: 56px;
     }
 
     .title-icon {
-      width: 28px;
-      height: 28px;
+      width: 56px;
+      height: 56px;
       object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .title-text {
+      height: 56px;
+      line-height: 56px;
+      font-size: 26px;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
     #dropZone {
@@ -100,10 +108,9 @@
   <div class="preview" id="preview"></div>
 
   <div class="panel">
-    <!-- 🔹 UPDATED HEADER -->
     <h2 class="title">
       <img src="./ikg_icon.png" class="title-icon">
-      Bitmap Font Tester
+      <span class="title-text">Bitmap Font Tester</span>
     </h2>
 
     <div id="dropZone">
